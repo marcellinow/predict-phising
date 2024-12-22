@@ -1,4 +1,6 @@
 # Predict Phishing
+# Kelompok 36
+# Tucil 44 & 64
 
 A notebook-based project to predict phishing attempts through link analysis.
 
