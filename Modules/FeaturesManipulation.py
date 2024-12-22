@@ -73,12 +73,12 @@ def column_major_legit(df, column, label='label', merge=False):
     if column not in df.columns or label not in df.columns:
         raise ValueError(f"DataFrame must contain '{column}' and '{label}' columns")
     
-    print("entering algorithm to find majority legitimate columns")
+    # print("entering algorithm to find majority legitimate columns")
     col_counts = df.groupby(column)[label].value_counts().unstack(fill_value=0)
     col_name = f'{column}MajorityLegit'
     col_counts[col_name] = col_counts[0] < col_counts[1]
     col_counts[col_name] = col_counts[col_name].map({True: 0, False: 1})
-    print("DONE\n")
+    # print("DONE\n")
     
     if merge:
         df = df.merge(col_counts[[col_name]], on=column, how='left')
