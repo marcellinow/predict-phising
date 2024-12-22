@@ -15,12 +15,17 @@ class FeaturesManipulation:
         
         '''
         self.df = df
+        self.legit_tlds = load_legit_tlds("Modules/legit_tld.txt")
         self.features_manipulation()
+        
     def features_manipulation(self):
-        self.df = column_major_legit(self.df, 'TLD', merge=True)
-        legit_domains = column_major_legit(self.df, 'Domain',merge=False)
-        self.df['HasObfuscation'] = self.df['URL'].apply(lambda x: has_obfuscation(x,legit_domains=legit_domains))
-
+        # self.df = column_major_legit(self.df, 'TLD', merge=True)
+        self.df['TLDMajorityLegit'] = self.df['TLD'].apply(lambda tld: tld_legit(tld,self.legit_tlds))
+        self.df['HasObfuscation'] = self.df['URL'].apply(lambda x: has_obfuscation(x,self.legit_tlds))
+def load_legit_tlds(filepath):
+    with open(filepath, 'r') as file:
+        tlds = file.read().replace("\n", "").split(",")
+    return [tld.strip().strip("'\'") for tld in tlds]
 def extract_domain(url):
     '''
     Function to extract domain from url
@@ -85,13 +90,16 @@ def column_major_legit(df, column, label='label', merge=False):
         return df
     else:
         return col_counts[col_counts[col_name] == 0].index.to_list()
-
-def has_obfuscation(url, legit_domains):
+def tld_legit(tld,tld_legit):
+    if tld in tld_legit:
+        return 1
+    return 0
+def has_obfuscation(url, legit_tld):
     '''
     Function to check whether the URL contains obfuscated method inside of it
     input:
         url : str
-        legit_domains : list of legitimate domains
+        legit_tld : list of legitimate tlds
     output:
         boolean : whether the url has obfuscation or not, 1: True it does have an obfuscation, 0: False it doesn't have an obfuscation
     '''
@@ -112,11 +120,22 @@ def has_obfuscation(url, legit_domains):
     if count_subdomains(url) > 3:
         return True
 
-    domain = extract_domain(url)
-    if domain in legit_domains:
+    tld = extract_tld(url)
+    if tld in legit_tld:
         return False
     return True
-
+def extract_tld(url):
+    '''
+    Function to extract Top Level Domain of the URL
+    input:
+        URL : str
+    output:
+        tld : str
+    '''
+    if pd.isna(url):
+        return np.nan
+    extracted = tldextract.extract(url)
+    return extracted.suffix
 def count_subdomains(url):
     '''
     Function to count the number of subdomains in a URL
