@@ -30,7 +30,7 @@ class NaiveBayes:
         
         return self.uniques[np.argmax(posteriors)]
     
-    # Probability Density Function
+  
     def _pdf(self, unique_idx, x):
         mean = self.mean[unique_idx]
         var = self.var[unique_idx]
