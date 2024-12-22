@@ -51,6 +51,7 @@ class FeaturesMissingHandler:
         
     # Handling missing values 
     def handling_missing_values(self):
+        #Extraction from URL
 
         self.df['DomainLength'] = self.df['Domain'].apply(lambda x: domain_length(x))
         self.df['URLLength']= self.df['URL'].apply(lambda x: url_length(x))
@@ -68,6 +69,7 @@ class FeaturesMissingHandler:
         self.df['NoOfAmpersandInURL'] = self.df['URL'].apply(count_ampersand)
         self.df['NoOfOtherSpecialCharsInURL'] = self.df['URL'].apply(count_special_chars)
         self.df['SpecialCharRatioInURL'] = self.df['URL'].apply(calc_spacial_char_ratio)
+
         self.df['HasTitle'] = self.df['Title'].apply(hastitle)
     def features_engineering(self):# Feature Engineering
         self.df['WebComplexity'] = web_complexity(self.df)
