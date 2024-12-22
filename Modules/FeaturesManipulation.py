@@ -5,6 +5,7 @@ import urllib
 from urllib.parse import urlparse
 from unidecode import unidecode
 import tldextract
+from sklearn.impute import KNNImputer, SimpleImputer
 
 class FeaturesManipulation:
     def __init__(self,df):
@@ -15,6 +16,7 @@ class FeaturesManipulation:
         
         '''
         self.df = df
+        impute_nan(self.df)
         self.legit_tlds = load_legit_tlds("Modules/legit_tld.txt")
         self.features_manipulation()
         
@@ -167,3 +169,25 @@ def count_subdomains(url):
         
         return max(0, len(parts) - 2)
     return 0  
+
+def impute_nan(df):
+        '''
+    Function to impute missing values in numerical columns using KNNImputer
+    Args:
+        df (pd.DataFrame): The input dataframe
+        n_neighbors (int): Number of neighbors to use for KNNImputer
+    Returns:
+        pd.DataFrame: DataFrame with missing values imputed
+    '''
+        # print("num\n")
+        num_col = df.select_dtypes(include=[np.number]).columns[df.select_dtypes(include=[np.number]).isnull().any()]
+        num_imputer = SimpleImputer(strategy="mean")
+        df[num_col] = num_imputer.fit_transform(df[num_col])
+
+        # print("cat\n")
+        cat_col = df.select_dtypes(include=[object]).columns[df.select_dtypes(include=[object]).isnull().any()]
+        cat_imputer = SimpleImputer(strategy='most_frequent')
+        df[cat_col] =  cat_imputer.fit_transform(df[cat_col])
+
+        # print("done\n")
+        return df
